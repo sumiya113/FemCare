@@ -1,6 +1,6 @@
 {
-  "name": "",
-  "description": "",
+  "name": "FemCare Wellness Platform",
+  "description": "An interactive, educational, and clinically-guided platform dedicated to women's hormone and menstrual health, complete with AI symptom assessment, resource databases, and cycle syncing guidelines.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
