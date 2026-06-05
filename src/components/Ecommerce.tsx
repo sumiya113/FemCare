@@ -32,7 +32,8 @@ export default function Ecommerce({
 
   const filteredProducts = products.filter(prod => {
     const matchesSearch = prod.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          prod.description.toLowerCase().includes(searchTerm.toLowerCase());
+                          prod.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          prod.category.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || prod.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -188,30 +189,58 @@ export default function Ecommerce({
         </div>
 
         {/* Full Shop Segment Title */}
-        <div className="border-t border-neutral-100 pt-16 flex flex-col md:flex-row items-center justify-between gap-4 mb-8" id="shop-controls">
+        <div className="border-t border-[#FF6B9D]/15 pt-16 flex flex-col md:flex-row items-center justify-between gap-4 mb-6" id="shop-controls">
           <div>
-            <h3 className="font-display font-extrabold text-xl sm:text-2xl text-neutral-main">
-              Filter By Lifecycle Support
-            </h3>
-            <p className="text-neutral-sub text-xs sm:text-sm mt-0.5 font-medium">
+            <div className="flex items-center space-x-2">
+              <h3 className="font-display font-extrabold text-xl sm:text-2xl text-neutral-main">
+                Filter By Lifecycle Support
+              </h3>
+              <span className="px-2.5 py-0.5 bg-[#FFF0F5] border border-[#FF6B9D]/15 text-[#FF6B9D] font-extrabold rounded-full text-[10px] animate-pulse">
+                {filteredProducts.length} {filteredProducts.length === 1 ? 'Product' : 'Products'}
+              </span>
+            </div>
+            <p className="text-[#636E72] text-xs sm:text-sm mt-0.5 font-semibold">
               Explore dynamic nutraceuticals, cycle planners, and muscle relaxation aids.
             </p>
           </div>
 
-          <div className="flex items-center space-x-2.5 w-full md:w-auto" id="shop-inputs">
+          <div className="flex items-center space-x-2.5 w-full md:w-auto md:max-w-md flex-1 md:flex-initial" id="shop-inputs">
             {/* Search */}
-            <div className="relative flex-1 md:flex-initial">
+            <div className="relative flex-1 md:w-80">
               <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-400">
-                <Search className="h-4 w-4" />
+                <Search className="h-4 w-4 text-[#FF6B9D]" />
               </span>
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search products..."
-                className="block w-full pl-9 pr-3 py-2.5 bg-white border border-neutral-200 rounded-xl text-xs sm:text-sm focus:outline-hidden focus:ring-1 focus:ring-brand-400 focus:border-brand-400"
+                placeholder="Search name, category or concern..."
+                className="block w-full pl-9 pr-9 py-2.5 bg-white border border-[#FF6B9D]/20 focus:border-[#FF6B9D]/60 rounded-xl text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-[#FF6B9D]/10 transition-all font-semibold text-neutral-main placeholder:text-neutral-400"
               />
+              {searchTerm && (
+                <button
+                  type="button"
+                  id="clear-search-btn"
+                  onClick={() => setSearchTerm('')}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#636E72] hover:text-[#FF6B9D] transition cursor-pointer"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </div>
+
+            {(searchTerm || selectedCategory !== 'All') && (
+              <button
+                id="reset-filters-btn"
+                onClick={() => {
+                  setSearchTerm('');
+                  setSelectedCategory('All');
+                }}
+                className="px-3.5 py-2.5 text-xs font-bold text-[#FF6B9D] hover:text-[#E84393] underline hover:no-underline transition cursor-pointer flex-shrink-0"
+              >
+                Reset
+              </button>
+            )}
           </div>
         </div>
 
@@ -266,84 +295,95 @@ export default function Ecommerce({
             <p className="text-neutral-sub font-semibold">No wellness supplements found matching the description.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mt-6" id="products-grid">
-            {filteredProducts.map((prod) => (
-              <div
-                key={prod.id}
-                id={`product-card-${prod.id}`}
-                className="bg-white rounded-3xl border border-neutral-100 hover:border-brand-200/50 hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col justify-between group"
-              >
-                {/* Image panel */}
-                <div className="h-56 relative overflow-hidden bg-neutral-50 border-b border-neutral-50">
-                  <img 
-                    src={prod.image} 
-                    alt={prod.name} 
-                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <button
-                    id={`toggle-wishlist-${prod.id}`}
-                    onClick={() => handleToggleWishlist(prod.id)}
-                    className="absolute top-3 right-3 p-2.5 rounded-xl bg-white/80 hover:bg-white text-neutral-sub hover:text-brand-500 transition shadow-xs z-10 cursor-pointer"
-                  >
-                    <Heart 
-                      className={`h-4.5 w-4.5 ${
-                        wishlist.includes(prod.id) ? 'fill-brand-500 text-brand-500' : 'text-neutral-sub'
-                      }`} 
+          <motion.div 
+            layout
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mt-6" 
+            id="products-grid"
+          >
+            <AnimatePresence mode="popLayout">
+              {filteredProducts.map((prod) => (
+                <motion.div
+                  layout
+                  key={prod.id}
+                  id={`product-card-${prod.id}`}
+                  initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 15 }}
+                  transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                  className="bg-white rounded-3xl border border-neutral-100 hover:border-[#FF6B9D]/40 hover:shadow-xl hover:shadow-pink-100/10 transition-all duration-300 overflow-hidden flex flex-col justify-between group"
+                >
+                  {/* Image panel */}
+                  <div className="h-56 relative overflow-hidden bg-neutral-50 border-b border-neutral-50">
+                    <img 
+                      src={prod.image} 
+                      alt={prod.name} 
+                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                  </button>
+                    <button
+                      id={`toggle-wishlist-${prod.id}`}
+                      onClick={() => handleToggleWishlist(prod.id)}
+                      className="absolute top-3 right-3 p-2.5 rounded-xl bg-white/80 hover:bg-white text-neutral-sub hover:text-brand-500 transition shadow-xs z-10 cursor-pointer"
+                    >
+                      <Heart 
+                        className={`h-4.5 w-4.5 ${
+                          wishlist.includes(prod.id) ? 'fill-brand-500 text-brand-500' : 'text-neutral-sub'
+                        }`} 
+                      />
+                    </button>
 
-                  <span className="absolute bottom-3 left-3 bg-accent-50/90 border border-accent-100 text-accent-700 text-[9px] font-extrabold uppercase px-2.5 py-1 rounded-full backdrop-blur-xs tracking-wider">
-                    {prod.category}
-                  </span>
-                </div>
-
-                {/* Content info */}
-                <div className="p-5.5 flex-1 flex flex-col justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-1">
-                      <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                      <span className="text-[10px] font-bold text-neutral-main">({prod.rating} rating)</span>
-                    </div>
-
-                    <h4 className="font-display font-extrabold text-base text-neutral-main group-hover:text-brand-500 transition">
-                      {prod.name}
-                    </h4>
-                    <p className="text-xs text-neutral-sub leading-relaxed line-clamp-2">
-                      {prod.description}
-                    </p>
-                  </div>
-
-                  {/* Actions footer block */}
-                  <div className="flex items-center justify-between mt-5 pt-4 border-t border-neutral-100">
-                    <span className="font-display font-black text-lg text-neutral-main">
-                      ${prod.price}
+                    <span className="absolute bottom-3 left-3 bg-accent-50/90 border border-accent-100 text-accent-700 text-[9px] font-extrabold uppercase px-2.5 py-1 rounded-full backdrop-blur-xs tracking-wider">
+                      {prod.category}
                     </span>
+                  </div>
 
-                    <div className="flex items-center space-x-2">
-                      <button
-                        id={`view-details-${prod.id}`}
-                        onClick={() => setSelectedProduct(prod)}
-                        title="View details & reviews"
-                        className="p-2 rounded-lg bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 text-neutral-sub hover:text-neutral-main transition cursor-pointer"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </button>
-                      
-                      <button
-                        id={`add-to-cart-${prod.id}`}
-                        onClick={() => handleAddToCart(prod)}
-                        className="px-4 py-2.5 rounded-xl bg-neutral-main hover:bg-brand-500 hover:text-white text-white text-xs font-bold transition flex items-center space-x-1.5 cursor-pointer shadow-xs active:scale-95"
-                      >
-                        <ShoppingCart className="h-3.5 w-3.5" />
-                        <span>Add To Cart</span>
-                      </button>
+                  {/* Content info */}
+                  <div className="p-5.5 flex-1 flex flex-col justify-between">
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-1">
+                        <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                        <span className="text-[10px] font-bold text-neutral-main">({prod.rating} rating)</span>
+                      </div>
+
+                      <h4 className="font-display font-extrabold text-base text-neutral-main group-hover:text-brand-500 transition">
+                        {prod.name}
+                      </h4>
+                      <p className="text-xs text-neutral-sub leading-relaxed line-clamp-2">
+                        {prod.description}
+                      </p>
+                    </div>
+
+                    {/* Actions footer block */}
+                    <div className="flex items-center justify-between mt-5 pt-4 border-t border-neutral-100">
+                      <span className="font-display font-black text-lg text-neutral-main">
+                        ${prod.price}
+                      </span>
+
+                      <div className="flex items-center space-x-2">
+                        <button
+                          id={`view-details-${prod.id}`}
+                          onClick={() => setSelectedProduct(prod)}
+                          title="View details & reviews"
+                          className="p-2 rounded-lg bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 text-neutral-sub hover:text-neutral-main transition cursor-pointer"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        
+                        <button
+                          id={`add-to-cart-${prod.id}`}
+                          onClick={() => handleAddToCart(prod)}
+                          className="px-4 py-2.5 rounded-xl bg-neutral-main hover:bg-brand-500 hover:text-white text-white text-xs font-bold transition flex items-center space-x-1.5 cursor-pointer shadow-xs active:scale-95"
+                        >
+                          <ShoppingCart className="h-3.5 w-3.5" />
+                          <span>Add To Cart</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-              </div>
-            ))}
-          </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
         )}
 
         {/* Modal product details / reviews */}
