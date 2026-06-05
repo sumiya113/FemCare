@@ -357,9 +357,17 @@ export default function App() {
                       </div>
                     </div>
                   ) : isCheckingOut ? (
-                    <div className="text-center py-24 space-y-4">
-                      <div className="h-12 w-12 border-4 border-brand-100 border-t-brand-500 animate-spin rounded-full mx-auto"></div>
-                      <p className="text-xs text-neutral-sub font-semibold">Broadcasting secure credit card authorizations parameters...</p>
+                    <div className="text-center py-10 space-y-6">
+                      {/* Shipping info loading skeleton */}
+                      <div className="space-y-4 text-left p-4 bg-neutral-50 rounded-2xl border border-neutral-100 animate-pulse">
+                        <span className="text-[10px] font-extrabold text-neutral-main uppercase tracking-wide block">Broadcasting SSL Shipment data</span>
+                        <div className="h-8 bg-neutral-200/60 rounded-xl"></div>
+                        <div className="h-8 bg-neutral-200/60 rounded-xl"></div>
+                      </div>
+                      <div className="flex flex-col items-center justify-center space-y-3">
+                        <div className="h-10 w-10 border-4 border-neutral-150 border-t-[#FF6B9D] animate-spin rounded-full"></div>
+                        <p className="text-xs text-[#636E72] font-semibold">Verifying secure multi-node tokenization...</p>
+                      </div>
                     </div>
                   ) : cart.length === 0 ? (
                     <div className="text-center py-20 space-y-4" id="cart-empty-prompt">
@@ -381,28 +389,37 @@ export default function App() {
                   ) : (
                     /* Render Cart items list */
                     <div className="space-y-4" id="cart-checkout-form-container text-left">
-                      {/* Items loop */}
-                      <div className="divide-y divide-neutral-100" id="cart-items-scroller">
-                        {cart.map((item) => (
-                          <div key={item.id} className="py-3 flex sm:items-center justify-between gap-3 text-left">
-                            <div className="flex items-center space-x-3">
-                              <img src={item.product.image} alt={item.product.name} className="h-11 w-11 rounded-lg object-cover flex-shrink-0" />
-                              <div>
-                                <span className="text-[10px] text-[#9b59b6] font-bold uppercase">{item.product.category}</span>
-                                <h5 className="text-xs font-bold text-neutral-main line-clamp-1 leading-tight">{item.product.name}</h5>
-                                <span className="text-[10px] text-neutral-sub font-semibold mt-0.5 block">${item.product.price} (Qty x{item.quantity})</span>
-                              </div>
-                            </div>
-
-                            <button
-                              id={`remove-cart-item-${item.product.id}`}
-                              onClick={() => handleRemoveCartItem(item.id)}
-                              className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 hover:text-rose-700 transition cursor-pointer"
+                      {/* Items loop with motion transitions */}
+                      <div className="divide-y divide-neutral-150" id="cart-items-scroller">
+                        <AnimatePresence initial={false}>
+                          {cart.map((item) => (
+                            <motion.div 
+                              key={item.id}
+                              initial={{ opacity: 0, height: 0, y: 15 }}
+                              animate={{ opacity: 1, height: 'auto', y: 0 }}
+                              exit={{ opacity: 0, height: 0, y: -15 }}
+                              transition={{ type: 'spring', damping: 22, stiffness: 220 }}
+                              className="py-3 flex sm:items-center justify-between gap-3 text-left overflow-hidden"
                             >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </div>
-                        ))}
+                              <div className="flex items-center space-x-3">
+                                <img src={item.product.image} alt={item.product.name} className="h-11 w-11 rounded-lg object-cover flex-shrink-0" />
+                                <div>
+                                  <span className="text-[10px] text-[#9b59b6] font-bold uppercase">{item.product.category}</span>
+                                  <h4 className="text-xs font-bold text-neutral-main line-clamp-1 leading-tight">{item.product.name}</h4>
+                                  <span className="text-[10px] text-neutral-sub font-semibold mt-0.5 block">${item.product.price} (Qty x{item.quantity})</span>
+                                </div>
+                              </div>
+
+                              <button
+                                id={`remove-cart-item-${item.product.id}`}
+                                onClick={() => handleRemoveCartItem(item.id)}
+                                className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 hover:text-rose-700 transition cursor-pointer"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </motion.div>
+                          ))}
+                        </AnimatePresence>
                       </div>
 
                       {/* Promotion parameters codes */}
@@ -469,7 +486,7 @@ export default function App() {
                 </div>
 
                 {/* Right Bottom checkout block */}
-                {!checkoutSuccess && !isCheckingOut && cart.length > 0 && (
+                {!checkoutSuccess && cart.length > 0 && (
                   <div className="p-6 border-t border-neutral-100 bg-neutral-50 space-y-4" id="cart-footer">
                     <div className="space-y-1.5 text-xs text-neutral-sub font-semibold">
                       <div className="flex justify-between">
@@ -495,17 +512,27 @@ export default function App() {
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => {
-                        // Triggers HTML form check
-                        const formBtn = document.getElementById('trigger-cart-checkout-hidden-btn');
-                        if (formBtn) formBtn.click();
-                      }}
-                      className="w-full py-4 text-center rounded-2xl bg-linear-to-r from-brand-500 to-brand-600 text-white font-bold font-display text-xs tracking-wider flex items-center justify-center space-x-2 shadow-md hover:shadow-lg cursor-pointer"
-                    >
-                      <span>Complete Secure Purchase • ${finalTotal.toFixed(2)}</span>
-                      <ArrowRight className="h-4 w-4" />
-                    </button>
+                    {isCheckingOut ? (
+                      <div 
+                        id="checkout-loading-skeleton"
+                        className="w-full py-4 text-center rounded-2xl bg-neutral-200 text-neutral-400 font-bold font-display text-xs tracking-wider flex items-center justify-center space-x-2.5 shadow-xs relative overflow-hidden animate-pulse"
+                      >
+                        <div className="h-4 w-4 border-2 border-neutral-400/30 border-t-neutral-500 animate-spin rounded-full"></div>
+                        <span>Processing Secure Checkout...</span>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          // Triggers HTML form check
+                          const formBtn = document.getElementById('trigger-cart-checkout-hidden-btn');
+                          if (formBtn) formBtn.click();
+                        }}
+                        className="w-full py-4 text-center rounded-2xl bg-linear-to-r from-[#FF6B9D] to-[#E84393] hover:scale-[1.01] active:scale-95 transition-all text-white font-bold font-display text-xs tracking-wider flex items-center justify-center space-x-2 shadow-md hover:shadow-lg cursor-pointer"
+                      >
+                        <span>Complete Secure Purchase • ${finalTotal.toFixed(2)}</span>
+                        <ArrowRight className="h-4 w-4" />
+                      </button>
+                    )}
                   </div>
                 )}
 

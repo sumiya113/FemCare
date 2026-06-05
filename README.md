@@ -245,14 +245,23 @@ npm run lint
 
 ## 🌐 Deployment
 
-The platform is designed to be shipped inside custom Docker containers or standard node platforms (such as Google Cloud Run, Vercel, or Heroku).
+### GitHub Pages (Static Hosting)
+The client-side portion of the FemCare platform is fully configured for hosting on GitHub Pages and other static hosting environments. We have integrated `gh-pages` and relative asset resolution capabilities:
 
-1. Trigger production builds:
+1. **Deploy statically to GitHub Pages:**
+   ```bash
+   npm run deploy
+   ```
+   *This command: (1) triggers `npm run build` to compile optimized assets into the `dist/` folder with relative URL paths, and (2) pushes the static bundle directly to your repository's `gh-pages` deployment branch.*
+
+### Full-Stack Containers (Express + Vite Proxy)
+For full-stack execution with live APIs, the application is ready to run inside Docker containers or platforms like Google Cloud Run or AWS ECS:
+
+1. **Build and bundle the full-stack server:**
    ```bash
    npm run build
    ```
-2. The compiler produces optimized assets to `dist/` and compiles the backend into `dist/server.cjs`.
-3. Boot the instance in your cloud container with:
+2. **Launch the production service:**
    ```bash
    npm start
    ```
